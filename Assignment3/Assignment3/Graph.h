@@ -4,33 +4,33 @@
 #define Graph_h
 
 #include <stdio.h>
+#include "Vertex.h"
 
 class Graph {
 public:
    
 private:
-   static const int MAX_VERTICES = 101;
+   static const int MAX_VERTICES = 5;
    
    struct EdgeNode {         // can change to a class, if desired
       int adjVertex;         // subscript of the adjacent vertex
       int weight;            // weight of edge
-      EdgeNode *nextEdge;
+      EdgeNode *nextEdge = nullptr;
    };
    
-   struct Vertex{
-      std::string v;
-   };
+    
+
    
    struct VertexNode {
-      EdgeNode *edgeHead;      // head of the list of edges
-      Vertex *data;      // store vertex data here
+      EdgeNode *edgeHead = nullptr;      // head of the list of edges
+      Vertex *data ;      // store vertex data here
    };
    
       // table of information for Dijkstra's algorithm
    struct Table {
-      bool visited;         // whether vertex has been visited
-      int dist;            // shortest known distance from source
-      int path;            // previous vertex in path of min dist
+      bool visited = false ;         // whether vertex has been visited
+      int dist = INT_MAX;            // shortest known distance from source
+      int path = 0;            // previous vertex in path of min dist
    };
      
    VertexNode vertices[MAX_VERTICES];  // array of VertexNodes
@@ -108,6 +108,8 @@ public:
    void displayAll() const; //output a table formatted with description from to dist and path
    
    void printPath(int src, int dest)const;
+   
+   void printPathDescription(int src, int dest) const;
 };
 
 #endif /* Graph_hpp */

@@ -39,6 +39,7 @@ int main() {
       if (infile1.eof())
          break;
       G.findShortestPath();
+      
       G.displayAll();              // display shortest distance, path to cout
       cout << endl << "The path from vertex 2 to vertex 3 is:" << endl;
       G.display(2, 3);             // display path from node 3 to 1 to cout

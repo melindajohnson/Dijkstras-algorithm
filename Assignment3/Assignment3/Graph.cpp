@@ -57,31 +57,36 @@ void Graph::buildGraph(ifstream& infile) {
    infile >> size;                          // data member stores array size
    if (infile.eof())
       return;
-   infile.ignore();                         // throw away '\n' to go to next line
+   infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n'); // throw away '\n' to go to next line
    
       // get descriptions of vertices
    for (int v = 1; v <= size; v++) {
-      VertexNode node ;
-      vertices[v] = node;
-      infile >> node.data->v;      // read descriptions (use of this method is not mandatory)
+      std::string name;
+      getline(infile, name);
+      //VertexNode node ;
+      Vertex *v1 = new Vertex();
+      v1->setVertexData(name);
+      vertices[v].data = v1;
+           // read descriptions (use of this method is not mandatory)
                                    // store appropriately
    }
    
-   
       // fill cost edge array
    int src = 1, dest = 1, weight = 1;
-   for (;;) {
+   for (;;)
+   {
       infile >> src >> dest >> weight;
-      if (src == 0 || infile.eof())
-         break;
+      if (src == 0 || infile.eof()) break;
       insertEdge(src, dest, weight);
    }
+   
 }
 
    //For insertEdge, replace any previous edge that existed between the two vertices.
 void Graph::insertEdge(int src, int dest, int weight){
+   EdgeNode *e1 = new EdgeNode;
    if(vertices[src].edgeHead == nullptr){
-      vertices[src].edgeHead = new EdgeNode;
+      vertices[src].edgeHead = e1;
       vertices[src].edgeHead->adjVertex = dest;
       vertices[src].edgeHead->weight = weight;
       vertices[src].edgeHead->nextEdge = nullptr;
@@ -98,7 +103,6 @@ void Graph::insertEdge(int src, int dest, int weight){
          curr = curr->nextEdge;
       }
       if(!edgeExists){
-         EdgeNode *e1 = new EdgeNode;
          e1->adjVertex = dest;
          e1->weight = weight;
          e1->nextEdge = nullptr;
@@ -109,7 +113,6 @@ void Graph::insertEdge(int src, int dest, int weight){
          curr->nextEdge = e1;
       }
    }
-   
 }
 void Graph::removeEdge(int src, int dest){
    if(vertices[src].edgeHead != nullptr){
@@ -136,11 +139,8 @@ void Graph::findShortestPath(){
          if(i==j) {
             T[i][j].dist = 0;
          }
-         T[i][j].dist = INT_MAX;
-         T[i][j].visited = false;
-         T[i][j].path = 0;
       }
-      int count = 0;
+      int count = 1;
       while(count < size)
       {
          int vertexToBeVisited = MinDistVertex(i);
@@ -148,11 +148,12 @@ void Graph::findShortestPath(){
          while(curr != nullptr)
          {
             int currentDistance = T[i][vertexToBeVisited].dist + curr->weight;
-            if(T[i][vertexToBeVisited].dist > currentDistance)
+            if(T[i][curr->adjVertex].dist > currentDistance)
             {
                T[i][curr->adjVertex].dist = currentDistance;
                T[i][curr->adjVertex].path = vertexToBeVisited;
             }
+            //
             curr = curr->nextEdge;
          }
          T[i][vertexToBeVisited].visited = true;
@@ -167,6 +168,7 @@ int Graph::MinDistVertex(int src){
    for(int i = 1; i <= size; i++){
       if(T[src][i].visited == false ){
          if(T[src][i].dist < minDistance){
+            minDistance = T[src][i].dist;
             index = i;
          }
       }
@@ -175,15 +177,27 @@ int Graph::MinDistVertex(int src){
 }
 
 void Graph::displayAll() const{
-   std::cout << "Description                  From  To    Dist  Path/n";
+   std::cout << "Description                  From  To   Dist  Path" <<endl;
    for(int i = 1; i <= size; i++){
-      std::cout << vertices[i].data->v << "/n";
+      std::cout << vertices[i].data->getVertexData() << endl;
       for(int j = 1; j <= size; j++){
-         std::cout << "                             "<< i << j << T[i][j].dist;
+         if(i!=j){
+         if(T[i][j].dist!=INT_MAX){
+         std::cout << "                             "<< i << "     " << j << "     " << T[i][j].dist <<"   ";
+         //std::cout << "     ";
          printPath(i, j);
-         std::cout << "/n";
+         std::cout << endl;
+         }
+         else
+         {
+            std::cout << "                             "<< i << "     " << j << "     --" ;
+            std::cout << "     ";
+           // printPath(i, j);
+            std::cout << endl;
+         }
       }
-      std::cout << "/n";
+      }
+      std::cout << endl;
    }
 }
 
@@ -194,14 +208,25 @@ void Graph::printPath(int src, int dest) const {
    else
    {
    printPath(src, T[src][dest].path);
-   std::cout << dest;
+   std::cout << " " << dest;
    }
 }
+
+void Graph::printPathDescription(int src, int dest) const {
+   if(src == dest) {
+      std::cout << vertices[src].data->getVertexData();
+   }
+   else
+   {
+      printPathDescription(src, T[src][dest].path);
+      std::cout << vertices[dest].data->getVertexData();
+   }
+}
+
 void Graph::display(int start, int end) const{
-   std::cout << "                             "<< start << end << T[start][end].dist;
+   std::cout <<start << "     " << end << "     " << T[start][end].dist<< "   ";
    printPath(start, end);
-   std::cout << "/n";
-   std::cout << vertices[start].data->v << "/n";
-   std::cout << vertices[end].data->v << "/n";
+   std::cout << endl;
+   printPathDescription(start, end);
 }
 
