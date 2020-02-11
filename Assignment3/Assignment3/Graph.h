@@ -97,6 +97,8 @@ public:
     Preconditions:
     Postconditions:
     */
+   int MinDistVertex(int src);
+   
    void display(int start, int end) const;
    /**
     //-------------------------- displayAll ------------------------------------//
@@ -105,6 +107,7 @@ public:
     */
    void displayAll() const; //output a table formatted with description from to dist and path
    
+   void printPath(int src, int dest)const;
 };
 
 #endif /* Graph_hpp */

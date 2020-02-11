@@ -1,6 +1,7 @@
 
 
 #include <fstream>
+#include <iostream>
 #include "Graph.h"
 using namespace std;
 
@@ -15,7 +16,7 @@ Graph::Graph(Graph& obj1){
          T[i][j] = obj1.T[i][j];
       }
    }
-   for(int v = 1; v < obj1.size; v++){
+   for(int v = 1; v <= obj1.size; v++){
       vertices[v] = obj1.vertices[v];
    }
 }
@@ -28,7 +29,7 @@ const Graph Graph::operator=(const Graph& right){
             T[i][j] = right.T[i][j];
          }
       }
-      for(int v = 1; v < right.size; v++){
+      for(int v = 1; v <= right.size; v++){
          vertices[v] = right.vertices[v];
       }
    }
@@ -36,13 +37,13 @@ const Graph Graph::operator=(const Graph& right){
 }
 
 Graph:: ~Graph(){
-   for(int v = 1; v < size; v++){
+   for(int v = 1; v <= size; v++){
       EdgeNode *temp = vertices[v].edgeHead;
       while(temp != nullptr){
          delete temp;
          temp = temp->nextEdge;
       }
-     delete vertices[v].data;
+      delete vertices[v].data;
    }
 }
 
@@ -123,19 +124,84 @@ void Graph::removeEdge(int src, int dest){
             EdgeNode *temp = curr->nextEdge;
             curr->nextEdge = curr->nextEdge->nextEdge;
             delete temp;
-           // break;
+               // break;
          }
          curr = curr->nextEdge;
       }
    }
 }
 void Graph::findShortestPath(){
-   
+   for(int i = 1; i <= size; i++){
+      for(int j = 1; j <= size; j++){
+         if(i==j) {
+            T[i][j].dist = 0;
+         }
+         T[i][j].dist = INT_MAX;
+         T[i][j].visited = false;
+         T[i][j].path = 0;
+      }
+      int count = 0;
+      while(count < size)
+      {
+         int vertexToBeVisited = MinDistVertex(i);
+         EdgeNode *curr = vertices[vertexToBeVisited].edgeHead;
+         while(curr != nullptr)
+         {
+            int currentDistance = T[i][vertexToBeVisited].dist + curr->weight;
+            if(T[i][vertexToBeVisited].dist > currentDistance)
+            {
+               T[i][curr->adjVertex].dist = currentDistance;
+               T[i][curr->adjVertex].path = vertexToBeVisited;
+            }
+            curr = curr->nextEdge;
+         }
+         T[i][vertexToBeVisited].visited = true;
+         count++;
+      }
+   }
 }
 
-void Graph::display(int start, int end) const{
-   
+int Graph::MinDistVertex(int src){
+   int minDistance = INT_MAX;
+   int index = 0;
+   for(int i = 1; i <= size; i++){
+      if(T[src][i].visited == false ){
+         if(T[src][i].dist < minDistance){
+            index = i;
+         }
+      }
+   }
+   return index;
 }
+
 void Graph::displayAll() const{
-   
+   std::cout << "Description                  From  To    Dist  Path/n";
+   for(int i = 1; i <= size; i++){
+      std::cout << vertices[i].data->v << "/n";
+      for(int j = 1; j <= size; j++){
+         std::cout << "                             "<< i << j << T[i][j].dist;
+         printPath(i, j);
+         std::cout << "/n";
+      }
+      std::cout << "/n";
+   }
 }
+
+void Graph::printPath(int src, int dest) const {
+   if(src == dest) {
+      std::cout << src;
+   }
+   else
+   {
+   printPath(src, T[src][dest].path);
+   std::cout << dest;
+   }
+}
+void Graph::display(int start, int end) const{
+   std::cout << "                             "<< start << end << T[start][end].dist;
+   printPath(start, end);
+   std::cout << "/n";
+   std::cout << vertices[start].data->v << "/n";
+   std::cout << vertices[end].data->v << "/n";
+}
+
