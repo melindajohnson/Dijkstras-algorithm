@@ -1,5 +1,39 @@
+/**---------------------------------------------------------------------------
+ GRAPH.H
+ Declaration of the Graph class
+ Author: Melinda Stannah Stanley Jothiraj
+ Student number- 1978413
+ --------------------------------------------------------------------
+ Graph class : Implements a Graph
+ 
+ Struct EdgeNode : A EdgeNode  represents the edges that connect vertices in a graph
+ - subscript of the adjacent vertex
+ - weight of edge
+ - Pointer to nextEdge
+ 
+ Struct VertexNode : A VertexNode  represents the vertex in a graph
+ - Pointer to the data in the Vertex
+ - Pointer to the head of a  list of EdgeNodes
+ 
+ Struct Table : A table  represents the information required for the Dijkstras algorithm
+ - boolean visited flag
+ - shortest known distance from source
+ - previous vertex in path of min dist
+ 
+ Includes additional features :
+ -- The class contains the findShortestPath method to fill in the Table T with shortest path between vertices
+ -- The class contains the buildGraph method that builds the Graph by reading  graph  data from a file
+ -- The class contains the insertEdge method that builds the Graph by connecting vertices with direction and weight
+ -- The class contains the removeedge method that removes edges from the Graph
+ -- The class contains a copy constructor and an overloaded assignment operator which creates a deep copy of a Graph object
+ -- The class contains the displayall method to display the Table T with its contents on shortest Path and weight to reach to the destination Vertex
+ -- The class contains the display method to display the shortest Path and weight to reach to the destination Vertex for a particular source and destination vertex
 
-//assume that the input is properly formatted
+ Assumptions :
+ --That the input is properly formatted
+ --The graph will have no more than 100 vertices.
+--------------------------------------------------------------------------------------------------------------------
+**/
 #ifndef Graph_h
 #define Graph_h
 
@@ -8,53 +42,60 @@
 #include "Vertex.h"
 
 class Graph {
-public:
-   
+
 private:
-   static const int MAX_VERTICES = 5;
+   static const int MAX_VERTICES = 101;
    
-   struct EdgeNode {         // can change to a class, if desired
-      int adjVertex;         // subscript of the adjacent vertex
-      int weight;            // weight of edge
-      EdgeNode *nextEdge = nullptr;
+   struct EdgeNode {
+      int adjVertex;                   // subscript of the adjacent vertex
+      int weight;                      // weight of edge
+      EdgeNode *nextEdge = nullptr;    // pointer to next EdgeNode
    };
    
    struct VertexNode {
-      EdgeNode *edgeHead = nullptr;      // head of the list of edges
-      Vertex *data ;      // store vertex data here
+      EdgeNode *edgeHead = nullptr;    // head of the list of edges
+      Vertex *data;                   // store vertex data here
    };
    
-      // table of information for Dijkstra's algorithm
+   // table of information for Dijkstra's algorithm
    struct Table {
-      bool visited = false ;         // whether vertex has been visited
-      int dist = INT_MAX;            // shortest known distance from source
-      int path = 0;            // previous vertex in path of min dist
-//      bool operator()(const Table& a, const Table& b)
-//      {
-//         return (a.dist > b.dist);
-//         
-//      }
+      bool visited = false ;            // whether vertex has been visited
+      int dist = INT_MAX;               // shortest known distance from source
+      int path = 0;                     // previous vertex in path of min dist
    };
    
-   VertexNode vertices[MAX_VERTICES];  // array of VertexNodes
-   int size;               // number of vertices in the graph
-   Table T[MAX_VERTICES][MAX_VERTICES];
-      // stores visited, distance, path -
-      // two dimensional in order to solve
-      // for all sources
+   VertexNode vertices[MAX_VERTICES];   // array of VertexNodes
+   int size = 0;                        // number of vertices in the graph
+   Table T[MAX_VERTICES][MAX_VERTICES]; // stores visited, distance, path in order to solve for all sources
    
+   /**
+    //-------------------------- findPath for class Graph ------------------------------------//
+    Finds Path between source vertex and destination vertec using recursion
+    Preconditions: Table T is filled with data for all vertices
+    Postconditions: creates a string containing path from source to destination
+    @return string containing path from source to destination
+    */
+   std::string findPath(int src, int dest, std::string& path)const;
+   
+   /**
+    //-------------------------- copyChain ------------------------------------//
+    Preconditions: An adjaceny list is created whose head is the origChainPtr
+    Postconditions: Creates a deep copy of the adjaceny list whose head is the origChainPtr
+    @return an edgeNode
+    */
+   EdgeNode* copyChain(const EdgeNode* origChainPtr);
    
 public:
    /**
     //-------------------------- Default constructor for class Graph ------------------------------------//
     Preconditions: None
-    Postconditions:
+    Postconditions: All private data member are initialised
     */
    Graph();
    /**
     //-------------------------- Copy constructor for class Graph ------------------------------------//
-    Preconditions:
-    Postconditions:
+    Preconditions: A graph object obj1 is created
+    Postconditions: The graph objects contains a deep copy of the content of obj1
     */
    Graph(Graph& obj1);
    /**
@@ -71,49 +112,46 @@ public:
     */
    const Graph operator= (const Graph& right);
    /**
-    //-------------------------- buildGraph ------------------------------------//
-    Preconditions:
-    Postconditions:
-    */
+    //-------------------------------- buildGraph ---------------------------------//
+    Builds a graph by reading data from an ifstream
+    Preconditions:  infile has been successfully opened and the file contains  properly formated data (according to the program specs)
+    Postconditions: One graph is read from infile and stored in the object
+    **/
    void buildGraph(std::ifstream& file);
    /**
     //-------------------------- insertEdge ------------------------------------//
-    Preconditions:
-    Postconditions:
+    Preconditions:A graph object is created and verices array is filled with vertex
+    Postconditions: An edgeNode is created and added to the list of edge connected to edgeHead of is correponding vertexNode
+    or replace any previous edge that existed between the two vertices by changing just the weight of the edgeNode
     */
-   //For insertEdge, replace any previous edge that existed between the two vertices.
    void insertEdge(int src, int dest, int weight);
    /**
     //-------------------------- removeEdge ------------------------------------//
-    Preconditions:
-    Postconditions:
+    Preconditions:A graph object is created with vertices and edgeNodes
+    Postconditions: removes an edge whose adjVertex is equal to destination in the src vertex of the vertices array
+    @return boolean true if successfully removed or false if edge doesnt exist
     */
-   void removeEdge(int, int);
+   bool removeEdge(int, int);
    /**
     //-------------------------- findShortestPath ------------------------------------//
-    Preconditions:
-    Postconditions:
+    method that computes all shortest paths
+    Preconditions: A Graph object is created and the object is built with vertices and edges using the buildGraph method
+    Postconditions: uses a priority queue to compute shortest path between all vertices and fills the contents in Table T[][]
     */
-   void findShortestPath(); //method that computes all shortest paths
-   //Use recursion, not a container to display a path. Remember that you work backwards from the destination to the source to recover the path.
+   void findShortestPath();
    /**
     //-------------------------- display ------------------------------------//
-    Preconditions:
-    Postconditions:
+    Preconditions:A graph is created, built and shortest Paths have been computed
+    Postconditions: Output description from to dist and path. path is obtained using recusive helper method findPath()
     */
-   int MinDistVertex(int src);
-   
    void display(int start, int end) const;
    /**
     //-------------------------- displayAll ------------------------------------//
-    Preconditions:
-    Postconditions:
+    Preconditions:A graph is created, built and shortest Paths have been computed
+    Postconditions: Output a table formatted with description from to dist and path. path is obtained using recusive helper method findPath()
     */
-   void displayAll() const; //output a table formatted with description from to dist and path
+   void displayAll() const;
    
-  std::vector<int> printPath(int src, int dest, std::vector<int>& path)const;
-   
-   void printPathDescription(int src, int dest) const;
 };
 
 #endif /* Graph_hpp */
