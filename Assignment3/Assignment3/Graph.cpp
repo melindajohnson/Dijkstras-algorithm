@@ -2,9 +2,10 @@
 
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include "Graph.h"
 using namespace std;
-
+typedef pair<int, int> pi;
 Graph::Graph(){
    size = 0;
 }
@@ -63,12 +64,9 @@ void Graph::buildGraph(ifstream& infile) {
    for (int v = 1; v <= size; v++) {
       std::string name;
       getline(infile, name);
-      //VertexNode node ;
       Vertex *v1 = new Vertex();
       v1->setVertexData(name);
       vertices[v].data = v1;
-           // read descriptions (use of this method is not mandatory)
-                                   // store appropriately
    }
    
       // fill cost edge array
@@ -134,16 +132,45 @@ void Graph::removeEdge(int src, int dest){
    }
 }
 void Graph::findShortestPath(){
+      //   for(int i = 1; i <= size; i++){
+      //      for(int j = 1; j <= size; j++){
+      //         if(i==j) {
+      //            T[i][j].dist = 0;
+      //         }
+      //      }
+      //      int count = 1;
+      //      while(count < size)
+      //      {
+      //         int vertexToBeVisited = MinDistVertex(i);
+      //         EdgeNode *curr = vertices[vertexToBeVisited].edgeHead;
+      //         while(curr != nullptr)
+      //         {
+      //            int currentDistance = T[i][vertexToBeVisited].dist + curr->weight;
+      //            if(T[i][curr->adjVertex].dist > currentDistance)
+      //            {
+      //               T[i][curr->adjVertex].dist = currentDistance;
+      //               T[i][curr->adjVertex].path = vertexToBeVisited;
+      //            }
+      //            //
+      //            curr = curr->nextEdge;
+      //         }
+      //         T[i][vertexToBeVisited].visited = true;
+      //         count++;
+      //      }
+      //   }
    for(int i = 1; i <= size; i++){
-      for(int j = 1; j <= size; j++){
-         if(i==j) {
-            T[i][j].dist = 0;
-         }
-      }
+     
+      priority_queue<pi, vector<pi>, greater<pi> > queue1;
+        // Initialisation
+      T[i][i].dist = 0;
       int count = 1;
-      while(count < size)
+      queue1.push(make_pair(0, i));
+      while(!queue1.empty() && count < size )
       {
-         int vertexToBeVisited = MinDistVertex(i);
+         int vertexToBeVisited = queue1.top().second;
+         T[i][vertexToBeVisited].visited = true;
+         queue1.pop();
+            //visit all of the adjacent vertices of the current vertex.
          EdgeNode *curr = vertices[vertexToBeVisited].edgeHead;
          while(curr != nullptr)
          {
@@ -152,63 +179,67 @@ void Graph::findShortestPath(){
             {
                T[i][curr->adjVertex].dist = currentDistance;
                T[i][curr->adjVertex].path = vertexToBeVisited;
+               queue1.push(make_pair(currentDistance, curr->adjVertex));
             }
-            //
             curr = curr->nextEdge;
          }
-         T[i][vertexToBeVisited].visited = true;
          count++;
       }
    }
 }
 
-int Graph::MinDistVertex(int src){
-   int minDistance = INT_MAX;
-   int index = 0;
-   for(int i = 1; i <= size; i++){
-      if(T[src][i].visited == false ){
-         if(T[src][i].dist < minDistance){
-            minDistance = T[src][i].dist;
-            index = i;
-         }
-      }
-   }
-   return index;
-}
+
+   //int Graph::MinDistVertex(int src){
+   //   int minDistance = INT_MAX;
+   //   int index = 0;
+   //   for(int i = 1; i <= size; i++){
+   //      if(T[src][i].visited == false ){
+   //         if(T[src][i].dist < minDistance){
+   //            minDistance = T[src][i].dist;
+   //            index = i;
+   //         }
+   //      }
+   //   }
+   //   return index;
+   //}
 
 void Graph::displayAll() const{
-   std::cout << "Description                  From  To   Dist  Path" <<endl;
+   std::cout << "Description             From  To   Dist  Path" <<endl;
    for(int i = 1; i <= size; i++){
       std::cout << vertices[i].data->getVertexData() << endl;
       for(int j = 1; j <= size; j++){
          if(i!=j){
-         if(T[i][j].dist!=INT_MAX){
-         std::cout << "                             "<< i << "     " << j << "     " << T[i][j].dist <<"   ";
-         //std::cout << "     ";
-         printPath(i, j);
-         std::cout << endl;
+            if(T[i][j].dist!=INT_MAX){
+               std::cout << "                        "<< i << "     " << j << "     " << T[i][j].dist <<"   ";
+               std::vector<int> path;
+               printPath(i, j, path);
+               for (auto it = path.crbegin(); it != path.crend(); it++)
+               {
+                  std::cout << *it << ' ';
+               }
+               std::cout << endl;
+            }
+            else
+            {
+               std::cout << "                        "<< i << "     " << j << "     --" ;
+               std::cout << "     ";
+               std::cout << endl;
+            }
          }
-         else
-         {
-            std::cout << "                             "<< i << "     " << j << "     --" ;
-            std::cout << "     ";
-           // printPath(i, j);
-            std::cout << endl;
-         }
-      }
       }
       std::cout << endl;
    }
 }
 
-void Graph::printPath(int src, int dest) const {
+std::vector<int> Graph::printPath(int src, int dest, std::vector<int>& path) const {
    if(src == dest) {
-      std::cout << src;
+      path.push_back(src);
+      return path;
    }
    else
    {
-   printPath(src, T[src][dest].path);
-   std::cout << " " << dest;
+      path.push_back(dest);
+      return printPath(src, T[src][dest].path, path);
    }
 }
 
@@ -225,8 +256,18 @@ void Graph::printPathDescription(int src, int dest) const {
 
 void Graph::display(int start, int end) const{
    std::cout <<start << "     " << end << "     " << T[start][end].dist<< "   ";
-   printPath(start, end);
+   std::vector<int> path;
+   printPath(start, end, path);
+   for (auto it = path.crbegin(); it != path.crend(); it++)
+   {
+      std::cout << *it << ' ';
+   }
    std::cout << endl;
-   printPathDescription(start, end);
+   for (auto it = path.crbegin(); it != path.crend(); it++)
+   {
+      int vertexNumber = *it;
+      std::cout << vertices[vertexNumber].data->getVertexData();
+      
+   }
 }
 

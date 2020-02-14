@@ -4,6 +4,7 @@
 #define Graph_h
 
 #include <stdio.h>
+#include <vector>
 #include "Vertex.h"
 
 class Graph {
@@ -18,9 +19,6 @@ private:
       EdgeNode *nextEdge = nullptr;
    };
    
-    
-
-   
    struct VertexNode {
       EdgeNode *edgeHead = nullptr;      // head of the list of edges
       Vertex *data ;      // store vertex data here
@@ -31,14 +29,20 @@ private:
       bool visited = false ;         // whether vertex has been visited
       int dist = INT_MAX;            // shortest known distance from source
       int path = 0;            // previous vertex in path of min dist
+//      bool operator()(const Table& a, const Table& b)
+//      {
+//         return (a.dist > b.dist);
+//         
+//      }
    };
-     
+   
    VertexNode vertices[MAX_VERTICES];  // array of VertexNodes
    int size;               // number of vertices in the graph
    Table T[MAX_VERTICES][MAX_VERTICES];
       // stores visited, distance, path -
       // two dimensional in order to solve
       // for all sources
+   
    
 public:
    /**
@@ -107,7 +111,7 @@ public:
     */
    void displayAll() const; //output a table formatted with description from to dist and path
    
-   void printPath(int src, int dest)const;
+  std::vector<int> printPath(int src, int dest, std::vector<int>& path)const;
    
    void printPathDescription(int src, int dest) const;
 };
