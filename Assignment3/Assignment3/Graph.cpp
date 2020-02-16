@@ -35,10 +35,7 @@
  --------------------------------------------------------------------------------------------------------------------
  **/
 
-#include <fstream>
-#include <iostream>
-#include <queue>
-#include <sstream>
+
 #include "Graph.h"
 using namespace std;
 typedef pair<int, int> pi;
@@ -51,25 +48,14 @@ typedef pair<int, int> pi;
 Graph::Graph(){
    size = 0;
 }
+
 /**
  //-------------------------- Copy constructor for class Graph ------------------------------------//
  Preconditions: A graph object obj1 is created
  Postconditions: The graph objects contains a deep copy of the content of obj1
  */
 Graph::Graph(Graph& obj1){
-   size = obj1.size;
-   for (int i = 0; i < obj1.MAX_VERTICES; ++i){
-      for (int j = 0; j < obj1.MAX_VERTICES ; ++j){
-         T[i][j] = obj1.T[i][j];
-      }
-   }
-   for(int v = 1; v <= obj1.size; v++){
-         //Create deep copy of data in Vertex Node
-      vertices[v].data = new Vertex;
-      vertices[v].data->setVertexData(obj1.vertices[v].data->getVertexData());
-         //Create deep copy of edgeHead and its list in Vertex Node
-      vertices[v].edgeHead = copyChain(obj1.vertices[v].edgeHead);
-   }
+   copyHelper(obj1);
 }
 /**
  //-------------------------- Overloaded assignment operator =  ------------------------------------//
@@ -79,19 +65,8 @@ Graph::Graph(Graph& obj1){
  */
 const Graph Graph::operator=(const Graph& right){
    if (this != &right) {
-      size = right.size;
-      for (int i = 0; i < right.MAX_VERTICES; ++i){
-         for (int j = 0; j < right.MAX_VERTICES ; ++j){
-            T[i][j] = right.T[i][j];
-         }
-      }
-      for(int v = 1; v <= right.size; v++){
-            //Create deep copy of data in Vertex Node
-         vertices[v].data = new Vertex;
-         vertices[v].data->setVertexData(right.vertices[v].data->getVertexData());
-            //Create deep copy of edgeHead and its list in Vertex Node
-         vertices[v].edgeHead = copyChain(right.vertices[v].edgeHead);
-      }
+      clear(*this);
+      copyHelper(right);
    }
    return *this;
 }
@@ -103,12 +78,14 @@ const Graph Graph::operator=(const Graph& right){
  */
 Graph:: ~Graph(){
    for(int v = 1; v <= size; v++){
-      EdgeNode *temp = vertices[v].edgeHead;
-      while(temp != nullptr){
-         delete temp;
-         temp = temp->nextEdge;
-      }
       delete vertices[v].data;
+      EdgeNode *cur = vertices[v].edgeHead;
+      while(cur != nullptr){
+         EdgeNode *temp = cur->nextEdge;
+         delete cur;
+         cur = temp;
+      }
+     
    }
 }
 
@@ -287,23 +264,23 @@ void Graph::displayAll() const{
  */
 void Graph::display(int start, int end) const{
    if(T[start][end].dist!=INT_MAX){
-   std::cout <<start << "     " << end << "     " << T[start][end].dist<< "   ";
-   std::string path = " ";
-   cout << findPath(start, end, path) << endl;
-   for(char& c : path) {
-      int vertexNumber = c - '0' ;
-      if(vertexNumber > 0){
-         std::cout << vertices[vertexNumber].data->getVertexData();
+      std::cout <<start << "     " << end << "     " << T[start][end].dist<< "   ";
+      std::string path = " ";
+      cout << findPath(start, end, path) << endl;
+      for(char& c : path) {
+         int vertexNumber = c - '0' ;
+         if(vertexNumber > 0){
+            std::cout << vertices[vertexNumber].data->getVertexData();
+         }
       }
-   }
-   std::cout << endl;
+      std::cout << endl;
    }
    else
    {
       std::cout <<start << "     " << end << "     " << "--" << endl<< "No Path Exitst" << endl;
    }
 }
-//------------------------------------HELPER METHODS-------------------------------------------
+   //------------------------------------HELPER METHODS-------------------------------------------
 /**
  //-------------------------- findPath ------------------------------------//
  Finds Path between source vertex and destination vertec using recursion
@@ -324,21 +301,66 @@ std::string Graph::findPath(int src, int dest, std::string& path) const {
       
    }
 }
+
 /**
- //-------------------------- copyChain ------------------------------------//
- Preconditions: An adjaceny list is created whose head is the origChainPtr
- Postconditions: Creates a deep copy of the adjaceny list whose head is the origChainPtr
- @return an edgeNode
+ -------------------------- copyHelper ------------------------------------//
+ Preconditions: A graph object obj1 is created
+ Postconditions: Creates a deep copy of the Graph object
  */
-Graph::EdgeNode* Graph::copyChain(const EdgeNode* origChainPtr){
-   EdgeNode* copiedChainPtr = nullptr;
-   if (origChainPtr != nullptr)
-   {
-         // Build new chain from given one
-      EdgeNode* copiedChainPtr = new EdgeNode;
-      copiedChainPtr->adjVertex = origChainPtr->adjVertex;
-      copiedChainPtr->weight = origChainPtr->weight;
-      copiedChainPtr->nextEdge = copyChain(origChainPtr->nextEdge);
+void Graph::copyHelper(const Graph& obj1) {
+   size = obj1.size;
+      //Copy contents of the 2d array of Tables T[][]
+   for (int i = 0; i < obj1.MAX_VERTICES; ++i){
+      for (int j = 0; j < obj1.MAX_VERTICES ; ++j){
+         T[i][j] = obj1.T[i][j];
+      }
    }
-   return copiedChainPtr;
+      //Copy contents of the vertices array
+   for(int v = 1; v <= obj1.size; v++){
+         //Create deep copy of data in Vertex Node
+      vertices[v].data = new Vertex;
+      vertices[v].data->setVertexData(obj1.vertices[v].data->getVertexData());
+         //Create deep copy of edgeHead and its list in Vertex Node
+      if (obj1.vertices[v].edgeHead == nullptr) {
+         vertices[v].edgeHead  = nullptr;
+      }
+      else {
+         vertices[v].edgeHead  = new EdgeNode;
+         vertices[v].edgeHead->adjVertex = obj1.vertices[v].edgeHead->adjVertex;
+         vertices[v].edgeHead->weight = obj1.vertices[v].edgeHead->weight;
+         EdgeNode *current = vertices[v].edgeHead;
+         EdgeNode *currentObj = obj1.vertices[v].edgeHead->nextEdge;
+         while (currentObj != nullptr) {
+            EdgeNode *newEdge = new EdgeNode;
+            newEdge->adjVertex = currentObj->adjVertex;
+            newEdge->weight = currentObj->weight;
+            current->nextEdge = newEdge;
+            current = current->nextEdge;
+            currentObj = currentObj->nextEdge;
+         }
+      }
+   }
+}
+/**
+ -------------------------- clear ------------------------------------//
+ Preconditions: A graph object obj1 is created
+ Postconditions: All dynamically allocated objects are deallocated and memory is freed
+ */
+void Graph::clear(const Graph& obj1){
+   for(int v = 1; v <= size; v++){
+      delete vertices[v].data;
+      EdgeNode *cur = vertices[v].edgeHead;
+      while(cur != nullptr){
+         EdgeNode *temp = cur->nextEdge;
+         delete cur;
+         cur = temp;
+      }
+   }
+   for (int i = 0; i < obj1.MAX_VERTICES; ++i){
+      for (int j = 0; j < obj1.MAX_VERTICES ; ++j){
+         T[i][j].dist = INT_MAX;
+         T[i][j].path = 0;
+         T[i][j].visited = false;
+      }
+   }
 }

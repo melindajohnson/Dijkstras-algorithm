@@ -38,13 +38,17 @@
 #define Graph_h
 
 #include <stdio.h>
-#include <vector>
+#include <fstream>
+#include <iostream>
+#include <queue>
+#include <sstream>
+#include <climits>
 #include "Vertex.h"
 
 class Graph {
 
 private:
-   static const int MAX_VERTICES = 101;
+   static const int MAX_VERTICES = 5;
    
    struct EdgeNode {
       int adjVertex;                   // subscript of the adjacent vertex
@@ -78,12 +82,19 @@ private:
    std::string findPath(int src, int dest, std::string& path)const;
    
    /**
-    //-------------------------- copyChain ------------------------------------//
-    Preconditions: An adjaceny list is created whose head is the origChainPtr
-    Postconditions: Creates a deep copy of the adjaceny list whose head is the origChainPtr
-    @return an edgeNode
+    -------------------------- copyHelper ------------------------------------//
+    Preconditions: A graph object obj1 is created
+    Postconditions: Creates a deep copy of the Graph object
     */
-   EdgeNode* copyChain(const EdgeNode* origChainPtr);
+   void copyHelper(const Graph& obj1);
+   
+   /**
+    -------------------------- clear ------------------------------------//
+    Preconditions: A graph object obj1 is created
+    Postconditions: All dynamically allocated objects are deallocated and memory is freed
+    */
+   void clear(const Graph& obj1);
+   
    
 public:
    /**
