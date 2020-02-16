@@ -63,7 +63,7 @@ Graph::Graph(Graph& obj1){
  Postconditions: *this is assigned the same data as in the right object but at a different memory location
  @return graph object which is a deep copy of the object right
  */
-const Graph Graph::operator=(const Graph& right){
+Graph Graph::operator=(const Graph& right){
    if (this != &right) {
       clear(*this);
       copyHelper(right);
@@ -205,9 +205,9 @@ void Graph::findShortestPath(){
       priority_queue<pi, vector<pi>, greater<pi> > queue1;
          // Initialisation
       T[i][i].dist = 0;
-      int count = 1;
       queue1.push(make_pair(0, i));
-      while(!queue1.empty() && count < size )
+      int count = 1;
+      while(!queue1.empty() && count < size)
       {
          int vertexToBeVisited = queue1.top().second;
          T[i][vertexToBeVisited].visited = true;

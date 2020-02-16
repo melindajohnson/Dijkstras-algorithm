@@ -11,6 +11,10 @@
    //   -- a text file named "HW3.txt" exists in the same directory
    //      as the code and is formatted as described in the specifications
    //---------------------------------------------------------------------------
+// #define _CRTDBG_MAP_ALLOC
+//#include <cstdlib>
+//#include <crtdbg.h>
+
 
 #include <iostream>
 #include <fstream>
@@ -25,7 +29,7 @@ using namespace std;
    //                  are used.  Should compile, run to completion, and output
    //                  correct answers if the classes are implemented correctly.
 int main() {
-   
+  //  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
    ifstream infile1("HW3.txt");
    if (!infile1) {
       cerr << "File could not be opened." << endl;

@@ -48,7 +48,7 @@
 class Graph {
 
 private:
-   static const int MAX_VERTICES = 5;
+   static const int MAX_VERTICES = 101;
    
    struct EdgeNode {
       int adjVertex;                   // subscript of the adjacent vertex
@@ -121,7 +121,7 @@ public:
     Postconditions: *this is assigned the same data as in the right object but at a different memory location
     @return graph object which is a deep copy of the object right
     */
-   const Graph operator= (const Graph& right);
+    Graph operator= (const Graph& right);
    /**
     //-------------------------------- buildGraph ---------------------------------//
     Builds a graph by reading data from an ifstream
