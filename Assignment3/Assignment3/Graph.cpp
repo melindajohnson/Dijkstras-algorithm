@@ -85,7 +85,6 @@ Graph:: ~Graph(){
          delete cur;
          cur = temp;
       }
-     
    }
 }
 
@@ -100,7 +99,7 @@ void Graph::buildGraph(ifstream& infile) {
    infile >> size;                          // data member stores array size
    if (infile.eof())
       return;
-   infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n'); // throw away '\n' to go to next line
+   infile.ignore(); // throw away '\n' to go to next line
    
       // get descriptions of vertices
    for (int v = 1; v <= size; v++) {
@@ -270,10 +269,9 @@ void Graph::display(int start, int end) const{
       for(char& c : path) {
          int vertexNumber = c - '0' ;
          if(vertexNumber > 0){
-            std::cout << vertices[vertexNumber].data->getVertexData();
+            std::cout << vertices[vertexNumber].data->getVertexData() << endl;;
          }
       }
-      std::cout << endl;
    }
    else
    {
